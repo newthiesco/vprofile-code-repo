@@ -3,38 +3,12 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: jdk17  # Use the appropriate Java version for your project
+      java: jdk17
     commands:
       - echo "Installing dependencies..."
-      - apt-get update && apt-get install -y jq  # Install jq for JSON parsing (optional)
-      - echo "Maven version:"
       - mvn -version
-
-  pre_build:
-    commands:
-      - echo "Pre-build phase: Downloading dependencies..."
-      - mvn dependency:go-offline -B  # Download dependencies for offline use
 
   build:
     commands:
       - echo "Building the project with Maven..."
-      - mvn clean package -DskipTests  # Build the project, skip tests for faster build
-
-  post_build:
-    commands:
-      - echo "Post-build phase: Running SonarQube analysis..."
-      - |
-        mvn sonar:sonar \
-          -Dsonar.projectKey=vprofile-repo8 \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login="$vprofile-sonartoken"
-
-artifacts:
-  files:
-    - '**/*'  # Include all build artifacts (adjust as needed)
-  discard-paths: yes
-
-cache:
-  paths:
-    - '/root/.m2/**/*'  # Cache Maven dependencies for faster builds
-
+      - mvn clean package -DskipTests
