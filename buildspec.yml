@@ -42,48 +42,5 @@ artifacts:
 cache:
   paths:
     - '/root/.m2/**/*'  # Cache Maven dependencies
-version: 0.2
 
-phases:
-  install:
-    runtime-versions:
-      java: corretto17  # Ensure this version is supported
-    commands:
-      - echo "Installing dependencies..."
-      - sudo apt-get update && sudo apt-get install -y jq  # Ensure jq installation
-      - echo "Maven version:"
-      - mvn -version
-
-  pre_build:
-    commands:
-      - echo "Exporting environment variables..."
-      - export Project="your-project-key"
-      - export Host="http://your-sonarqube-url"
-      - export VPROFILE_SONARTOKEN="your-sonarqube-token"
-      - echo "Pre-build phase: Downloading dependencies..."
-      - mvn dependency:go-offline -B  # Download dependencies
-
-  build:
-    commands:
-      - echo "Building the project with Maven..."
-      - mvn clean package -DskipTests  # Skip tests for faster build
-
-  post_build:
-    commands:
-      - echo "Post-build phase: Running SonarQube analysis..."
-      - |
-        mvn sonar:sonar \
-          -Dsonar.projectKey="$Project" \
-          -Dsonar.host.url="$Host" \
-          -Dsonar.login="$VPROFILE_SONARTOKEN"
-
-artifacts:
-  files:
-    - 'target/*.jar'  
-    - 'target/*.war'
-  discard-paths: yes
-
-cache:
-  paths:
-    - '/root/.m2/**/*'  # Cache Maven dependencies
 
