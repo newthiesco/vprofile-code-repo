@@ -23,7 +23,8 @@ phases:
   post_build:
     commands:
       - echo "Post-build phase: Running SonarQube analysis..."
-      - mvn sonar:sonar \
+      - |
+        mvn sonar:sonar \
           -Dsonar.projectKey=vprofile-repo8 \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login="$vprofile-sonartoken"
