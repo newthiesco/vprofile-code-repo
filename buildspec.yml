@@ -25,8 +25,8 @@ phases:
       - echo "Post-build phase: Running SonarQube analysis..."
       - |
         mvn sonar:sonar \
-          -Dsonar.projectKey=vprofile-repo8 \
-          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.projectKey="$Project \
+          -Dsonar.host.url="$Host \
           -Dsonar.login="$VPROFILE_SONARTOKEN"
 
 artifacts:
