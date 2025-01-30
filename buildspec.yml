@@ -3,38 +3,87 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      java: jdk17  # Use the appropriate Java version for your project
+      java: corretto17  # Ensure this version is supported
     commands:
       - echo "Installing dependencies..."
-      - apt-get update && apt-get install -y jq  # Install jq for JSON parsing (optional)
+      - sudo apt-get update && sudo apt-get install -y jq  # Ensure jq installation
       - echo "Maven version:"
       - mvn -version
 
   pre_build:
     commands:
+      - echo "Exporting environment variables..."
+      - export Project="$PROJECT"
+      - export Host="$HOST"
+      - export VPROFILE_SONARTOKEN="$VPROFILE_SONARTOKEN"
       - echo "Pre-build phase: Downloading dependencies..."
-      - mvn dependency:go-offline -B  # Download dependencies for offline use
+      - mvn dependency:go-offline -B  # Download dependencies
 
   build:
     commands:
       - echo "Building the project with Maven..."
-      - mvn clean package -DskipTests  # Build the project, skip tests for faster build
+      - mvn clean package -DskipTests  # Skip tests for faster build
 
   post_build:
     commands:
       - echo "Post-build phase: Running SonarQube analysis..."
       - |
         mvn sonar:sonar \
-          -Dsonar.projectKey="$Project \
-          -Dsonar.host.url="$Host \
+          -Dsonar.projectKey="$PROJECT" \
+          -Dsonar.host.url="$HOST" \
           -Dsonar.login="$VPROFILE_SONARTOKEN"
 
 artifacts:
   files:
-    - 'target/*.jar'  # Include only JAR files (adjust as needed)
-    - 'target/*.war'  # Include only WAR files (adjust as needed)
+    - 'target/*.jar'  
+    - 'target/*.war'
   discard-paths: yes
 
 cache:
   paths:
-    - '/root/.m2/**/*'  # Cache Maven dependencies for faster builds
+    - '/root/.m2/**/*'  # Cache Maven dependencies
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17  # Ensure this version is supported
+    commands:
+      - echo "Installing dependencies..."
+      - sudo apt-get update && sudo apt-get install -y jq  # Ensure jq installation
+      - echo "Maven version:"
+      - mvn -version
+
+  pre_build:
+    commands:
+      - echo "Exporting environment variables..."
+      - export Project="your-project-key"
+      - export Host="http://your-sonarqube-url"
+      - export VPROFILE_SONARTOKEN="your-sonarqube-token"
+      - echo "Pre-build phase: Downloading dependencies..."
+      - mvn dependency:go-offline -B  # Download dependencies
+
+  build:
+    commands:
+      - echo "Building the project with Maven..."
+      - mvn clean package -DskipTests  # Skip tests for faster build
+
+  post_build:
+    commands:
+      - echo "Post-build phase: Running SonarQube analysis..."
+      - |
+        mvn sonar:sonar \
+          -Dsonar.projectKey="$Project" \
+          -Dsonar.host.url="$Host" \
+          -Dsonar.login="$VPROFILE_SONARTOKEN"
+
+artifacts:
+  files:
+    - 'target/*.jar'  
+    - 'target/*.war'
+  discard-paths: yes
+
+cache:
+  paths:
+    - '/root/.m2/**/*'  # Cache Maven dependencies
+
