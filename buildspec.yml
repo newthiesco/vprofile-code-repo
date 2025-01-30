@@ -37,3 +37,4 @@ artifacts:
 cache:
   paths:
     - '/root/.m2/**/*'  # Cache Maven dependencies for faster builds
+
