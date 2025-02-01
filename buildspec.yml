@@ -32,9 +32,8 @@ phases:
       - ls $pwd
       - export PATH=$PATH:./sonar-scanner-4.7.0.2747-linux/bin/
       
-       # Retrieve the CodeArtifact token from AWS SSM
-       - echo "Retrieving CODEARTIFACT_TOKEN from SSM..."
-       - export CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "/aws/ssm/CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
+      - echo "Retrieving CODEARTIFACT_TOKEN from SSM..."
+      - export CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "/aws/ssm/CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
 
       # Authenticate with AWS CodeArtifact using the retrieved token
        - echo "Authenticating with AWS CodeArtifact..."
