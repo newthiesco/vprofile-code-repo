@@ -1,14 +1,14 @@
 version: 0.2
-# Good buildspec.yml for AWS CodeBuild with SonarCloud & CodeArtifact
+# AWS CodeBuild buildspec.yml for SonarCloud & AWS CodeArtifact (Maven)
 
 env:
   variables:
-    SONAR_HOST_URL: "https://sonarcloud.io"  # SonarCloud URL
-    SONAR_ORG: "kubeirving-projects"         # SonarCloud organization
-    SONAR_PROJECT: "vprofile-repo"           # SonarCloud project
-    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN" # SSM parameter for CodeArtifact token
-    SONAR_TOKEN: "VPROFILE_SONARTOKEN"       # SonarQube token (best stored in AWS Secrets Manager)
-    MAVEN_OPTS: "-Xmx2g"                     # Optimize Maven memory usage
+    SONAR_HOST_URL: "https://sonarcloud.io"
+    SONAR_ORG: "kubeirving-projects"
+    SONAR_PROJECT: "vprofile-repo"
+    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN"
+    SONAR_TOKEN: "VPROFILE_SONARTOKEN"
+    MAVEN_OPTS: "-Xmx2g"
 
 phases:
   install:
@@ -25,18 +25,42 @@ phases:
       - export PATH=$PATH:/opt/sonar-scanner/bin
       - echo 'export PATH=$PATH:/opt/sonar-scanner/bin' >> ~/.bashrc
 
-      # Retrieve CodeArtifact token from AWS SSM
-      - echo "Retrieving CODEARTIFACT_TOKEN from SSM..."
+      # Retrieve AWS CodeArtifact token
+      - echo "Retrieving CODEARTIFACT_TOKEN from AWS SSM..."
       - CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
       - export CODEARTIFACT_TOKEN
       - echo "Token retrieved."
 
       # Authenticate with AWS CodeArtifact
-      - echo "Authenticating with AWS CodeArtifact..."
+      - echo "Retrieving AWS CodeArtifact authorization token..."
       - CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain visualpath --domain-owner 339712930264 --region us-east-1 --query authorizationToken --output text)
       - export CODEARTIFACT_AUTH_TOKEN
-      - aws codeartifact login --tool maven --repository vprofile-maven-repo --domain visualpath --authorization-token $CODEARTIFACT_AUTH_TOKEN
-      - echo "AWS CodeArtifact authentication successful."
+      - echo "AWS CodeArtifact token retrieved successfully."
+
+      # Configure Maven to use CodeArtifact
+      - echo "Configuring Maven settings for AWS CodeArtifact..."
+      - mkdir -p ~/.m2
+      - |
+        cat > ~/.m2/settings.xml <<EOL
+        <settings>
+          <mirrors>
+            <mirror>
+              <id>aws-codeartifact</id>
+              <mirrorOf>*</mirrorOf>
+              <url>https://visualpath-339712930264.d.codeartifact.us-east-1.amazonaws.com/maven/vprofile-maven-repo/</url>
+              <repositoryManager>true</repositoryManager>
+            </mirror>
+          </mirrors>
+          <servers>
+            <server>
+              <id>aws-codeartifact</id>
+              <username>aws</username>
+              <password>${CODEARTIFACT_AUTH_TOKEN}</password>
+            </server>
+          </servers>
+        </settings>
+        EOL
+      - echo "Maven configuration completed."
 
   pre_build:
     commands:
@@ -62,8 +86,8 @@ phases:
 
 artifacts:
   files:
-    - target/*.jar  # Adjust based on your build artifacts
+    - target/*.jar
 
 cache:
   paths:
-    - '/root/.m2/**/*'  # Cache Maven dependencies to speed up builds
+    - '/root/.m2/**/*'
