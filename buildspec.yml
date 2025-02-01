@@ -1,5 +1,5 @@
 version: 0.2
-# Good buildspec.yml for AWS CodeBuild with SonarCloud & CodeArtifact
+# Optimized buildspec.yml for AWS CodeBuild with SonarCloud & CodeArtifact
 
 env:
   variables:
@@ -28,11 +28,16 @@ phases:
       # Authenticate with AWS CodeArtifact
       - echo "Retrieving CodeArtifact authentication token..."
       - export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain visualpath --domain-owner 339712930264 --region us-east-1 --query authorizationToken --output text)
-      - if [ -z "$CODEARTIFACT_AUTH_TOKEN" ]; then echo "❌ ERROR: Token not retrieved!"; exit 1; fi
+      
+      # Ensure token retrieval was successful
+      - |
+        if [ -z "$CODEARTIFACT_AUTH_TOKEN" ]; then
+          echo "❌ ERROR: CodeArtifact token not retrieved!";
+          exit 1;
+        fi
 
       - echo "Authenticating with AWS CodeArtifact..."
-      - aws codeartifact login --tool maven --repository vprofile-maven-repo --domain visualpath --authorization-token $CODEARTIFACT_AUTH_TOKEN
-      - if [ $? -ne 0 ]; then echo "❌ ERROR: AWS CodeArtifact login failed!"; exit 1; fi
+      - aws codeartifact login --tool maven --repository vprofile-maven-repo --domain visualpath
 
   pre_build:
     commands:
@@ -49,7 +54,6 @@ phases:
           -Dsonar.organization="$SONAR_ORG" \
           -Dsonar.login="$SONAR_TOKEN" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
-          -Dsonar.codeartifact.token="$CODEARTIFACT_AUTH_TOKEN" \
           -Dsonar.java.jdkHome="/usr/lib/jvm/java-17-openjdk-amd64"
 
   post_build:
