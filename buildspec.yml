@@ -26,7 +26,7 @@ phases:
 
       # Retrieve CodeArtifact token from AWS SSM
       - echo "Retrieving CODEARTIFACT_TOKEN from SSM..."
-      - export CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "/aws/ssm/CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
+      - export CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
 
       # Authenticate with AWS CodeArtifact
       - echo "Authenticating with AWS CodeArtifact..."
