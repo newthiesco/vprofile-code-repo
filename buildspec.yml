@@ -1,11 +1,12 @@
 version: 0.2
-# Optimized buildspec.yml for AWS CodeBuild with SonarCloud & CodeArtifact
+# Good buildspec.yml for AWS CodeBuild with SonarCloud & CodeArtifact
 
 env:
   variables:
     SONAR_HOST_URL: "https://sonarcloud.io"  # SonarCloud URL
     SONAR_ORG: "kubeirving-projects"         # SonarCloud organization
     SONAR_PROJECT: "vprofile-repo"           # SonarCloud project
+    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN" # SSM parameter for CodeArtifact token
     SONAR_TOKEN: "VPROFILE_SONARTOKEN"       # SonarQube token (best stored in AWS Secrets Manager)
     MAVEN_OPTS: "-Xmx2g"                     # Optimize Maven memory usage
 
@@ -18,26 +19,24 @@ phases:
       - mvn -version
 
       # Install Sonar Scanner
-      - echo "Installing Sonar Scanner..."
       - curl -sSLO https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
       - unzip sonar-scanner-cli-4.8.0.2856-linux.zip -d /opt
       - sudo mv /opt/sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
+      - export PATH=$PATH:/opt/sonar-scanner/bin
       - echo 'export PATH=$PATH:/opt/sonar-scanner/bin' >> ~/.bashrc
-      - source ~/.bashrc
+
+      # Retrieve CodeArtifact token from AWS SSM
+      - echo "Retrieving CODEARTIFACT_TOKEN from SSM..."
+      - CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
+      - export CODEARTIFACT_TOKEN
+      - echo "Token retrieved."
 
       # Authenticate with AWS CodeArtifact
-      - echo "Retrieving CodeArtifact authentication token..."
-      - export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain visualpath --domain-owner 339712930264 --region us-east-1 --query authorizationToken --output text)
-      
-      # Ensure token retrieval was successful
-      - |
-        if [ -z "$CODEARTIFACT_AUTH_TOKEN" ]; then
-          echo "❌ ERROR: CodeArtifact token not retrieved!";
-          exit 1;
-        fi
-
       - echo "Authenticating with AWS CodeArtifact..."
-      - aws codeartifact login --tool maven --repository vprofile-maven-repo --domain visualpath
+      - CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain visualpath --domain-owner 339712930264 --region us-east-1 --query authorizationToken --output text)
+      - export CODEARTIFACT_AUTH_TOKEN
+      - aws codeartifact login --tool maven --repository vprofile-maven-repo --domain visualpath --authorization-token $CODEARTIFACT_AUTH_TOKEN
+      - echo "AWS CodeArtifact authentication successful."
 
   pre_build:
     commands:
@@ -46,7 +45,7 @@ phases:
   build:
     commands:
       - echo "Building project with Maven..."
-      - mvn clean install  # Removed `-X` debug flag unless needed
+      - mvn clean install -X
 
       - echo "Running SonarCloud analysis..."
       - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -54,6 +53,7 @@ phases:
           -Dsonar.organization="$SONAR_ORG" \
           -Dsonar.login="$SONAR_TOKEN" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
+          -Dsonar.codeartifact.token="$CODEARTIFACT_AUTH_TOKEN" \
           -Dsonar.java.jdkHome="/usr/lib/jvm/java-17-openjdk-amd64"
 
   post_build:
