@@ -69,7 +69,7 @@ phases:
   build:
     commands:
       - echo "Building project with Maven..."
-      - mvn clean install -X
+      - mvn clean install -DskipTests=true -X
 
       - echo "Running SonarCloud analysis..."
       - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -78,7 +78,7 @@ phases:
           -Dsonar.login="$SONAR_TOKEN" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.codeartifact.token="$CODEARTIFACT_AUTH_TOKEN" \
-          -Dsonar.java.jdkHome="/usr/lib/jvm/java-17-openjdk-amd64"
+          -Dsonar.java.jdkHome="/usr/lib/jvm/java-11-openjdk-amd64"
 
   post_build:
     commands:
@@ -90,4 +90,4 @@ artifacts:
 
 cache:
   paths:
-    - '/root/.m2/**/*'
+    - '~/.m2/**/*'
