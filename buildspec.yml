@@ -1,5 +1,4 @@
 version: 0.2
-# AWS CodeBuild buildspec.yml for SonarCloud & AWS CodeArtifact (Maven)
 
 env:
   variables:
@@ -13,7 +12,7 @@ env:
 phases:
   install:
     commands:
-      - echo "Setting up Java 11...."
+      - echo "Setting up Java 17...."
       - sudo apt-get update && sudo apt-get install -y openjdk-11-jdk maven unzip curl
       - java -version
       - mvn -version
@@ -69,7 +68,7 @@ phases:
   build:
     commands:
       - echo "Building project with Maven..."
-      - mvn clean install -DskipTests=true -X
+      - mvn clean install -X
 
       - echo "Running SonarCloud analysis..."
       - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -77,8 +76,7 @@ phases:
         -Dsonar.organization="$SONAR_ORG" \
         -Dsonar.login="$SONAR_TOKEN" \
         -Dsonar.host.url="$SONAR_HOST_URL" \
-        -Dsonar.java.jdkHome="/usr/lib/jvm/java-17-openjdk-amd64"
-
+        -Dsonar.java.jdkHome="/usr/lib/jvm/java-11-openjdk-amd64" \
 
   post_build:
     commands:
