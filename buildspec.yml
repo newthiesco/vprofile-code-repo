@@ -2,90 +2,67 @@ version: 0.2
 
 env:
   variables:
+    # SonarCloud configuration (optional)
     SONAR_HOST_URL: "https://sonarcloud.io"
-    SONAR_ORG: "kubeirving-projects"
-    SONAR_PROJECT: "vprofile-repo"
+    SONAR_ORG: "kubeirving-projects"  # Replace with your SonarCloud organization
+    SONAR_PROJECT: "vprofile-repo"  # Replace with your SonarCloud project key
+    SONAR_TOKEN: "VPROFILE_SONARTOKEN"  # Replace with your SonarCloud token
+    MAVEN_OPTS: "-Xmx2g"  # Increase Maven memory limit
     CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN"
-    SONAR_TOKEN: "VPROFILE_SONARTOKEN"
-    MAVEN_OPTS: "-Xmx2g"
 
 phases:
   install:
     commands:
-      - echo "Setting up Java 17...."
-      - sudo apt-get update && sudo apt-get install -y openjdk-11-jdk maven unzip curl
+      # Install Java 8 (as specified in pom.xml)
+      - echo "Installing Java 8..."
+      - sudo apt-get update
+      - sudo apt-get install -y openjdk-8-jdk maven unzip curl
       - java -version
       - mvn -version
 
-      # Install Sonar Scanner
+      # Install Sonar Scanner (optional, for SonarCloud integration)
+      - echo "Installing Sonar Scanner..."
       - curl -sSLO https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
       - unzip sonar-scanner-cli-4.8.0.2856-linux.zip -d /opt
       - sudo mv /opt/sonar-scanner-4.8.0.2856-linux /opt/sonar-scanner
       - export PATH=$PATH:/opt/sonar-scanner/bin
       - echo 'export PATH=$PATH:/opt/sonar-scanner/bin' >> ~/.bashrc
 
-      # Retrieve AWS CodeArtifact token
-      - echo "Retrieving CODEARTIFACT_TOKEN from AWS SSM..."
-      - CODEARTIFACT_TOKEN=$(aws ssm get-parameter --name "CODEARTIFACT_TOKEN" --query "Parameter.Value" --output text)
-      - export CODEARTIFACT_TOKEN
-      - echo "Token retrieved."
-
-      # Authenticate with AWS CodeArtifact
-      - echo "Retrieving AWS CodeArtifact authorization token..."
-      - CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain visualpath --domain-owner 339712930264 --region us-east-1 --query authorizationToken --output text)
-      - export CODEARTIFACT_AUTH_TOKEN
-      - echo "AWS CodeArtifact token retrieved successfully."
-
-      # Configure Maven to use CodeArtifact
-      - echo "Configuring Maven settings for AWS CodeArtifact..."
-      - mkdir -p ~/.m2
-      - |
-        cat > ~/.m2/settings.xml <<EOL
-        <settings>
-          <mirrors>
-            <mirror>
-              <id>aws-codeartifact</id>
-              <mirrorOf>*</mirrorOf>
-              <url>https://visualpath-339712930264.d.codeartifact.us-east-1.amazonaws.com/maven/vprofile-maven-repo/</url>
-              <repositoryManager>true</repositoryManager>
-            </mirror>
-          </mirrors>
-          <servers>
-            <server>
-              <id>aws-codeartifact</id>
-              <username>aws</username>
-              <password>${CODEARTIFACT_AUTH_TOKEN}</password>
-            </server>
-          </servers>
-        </settings>
-        EOL
-      - echo "Maven configuration completed."
-
   pre_build:
     commands:
-      - echo "Preparing for SonarCloud analysis..."
+      # Optional: Print environment variables for debugging
+      - echo "Java version:"
+      - java -version
+      - echo "Maven version:"
+      - mvn -version
+      - echo "Sonar Scanner version:"
+      - sonar-scanner -v
 
   build:
     commands:
-      - echo "Building project with Maven..."
-      - mvn clean install -X
+      # Build the project and run tests
+      - echo "Building project and running tests..."
+      - mvn clean install
 
+      # Optional: Run SonarCloud analysis
       - echo "Running SonarCloud analysis..."
-      - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.projectKey="$SONAR_PROJECT" \
-        -Dsonar.organization="$SONAR_ORG" \
-        -Dsonar.login="$SONAR_TOKEN" \
-        -Dsonar.host.url="$SONAR_HOST_URL" \
-        -Dsonar.java.jdkHome="/usr/lib/jvm/java-11-openjdk-amd64" \
+      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey="$SONAR_PROJECT" \
+          -Dsonar.organization="$SONAR_ORG" \
+          -Dsonar.host.url="$SONAR_HOST_URL" \
+          -Dsonar.login="$SONAR_TOKEN"
 
   post_build:
     commands:
-      - echo "SonarCloud analysis complete."
+      # Optional: Print build artifacts
+      - echo "Build artifacts:"
+      - ls -l target/
 
 artifacts:
   files:
-    - target/*.jar
+    - target/*.war  # Package the WAR file as an artifact
+  discard-paths: yes
 
 cache:
   paths:
-    - '~/.m2/**/*'
+    - '~/.m2/**/*'  # Cache Maven dependencies for faster builds
