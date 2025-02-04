@@ -44,7 +44,7 @@ phases:
   build:
     commands:
       - echo "Building project and running tests..."
-      - mvn clean install
+      - mvn clean install -Dmaven.repo.remote=https://oss.sonatype.org/content/repositories/releases/
 
       - echo "Checking if SonarQube plugin is installed..."
       - mvn help:describe -Dplugin=org.sonarsource.scanner.maven:sonar-maven-plugin || mvn dependency:get -Dartifact=org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1
