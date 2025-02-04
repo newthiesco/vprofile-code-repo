@@ -7,9 +7,9 @@ env:
     SONAR_ORG: "ORGANIZATION"  # Replace with your SonarCloud organization
     SONAR_PROJECT: "SONAR_PROJECT"  # Replace with your SonarCloud project key
     SONAR_TOKEN: "VPROFILE_SONARTOKEN"  # Replace with your SonarCloud token
+    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN"
     MAVEN_OPTS: "-Xmx2g"  # Increase Maven memory limit
-   
-
+    
 phases:
   install:
     commands:
