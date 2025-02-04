@@ -5,7 +5,7 @@ env:
     # SonarCloud configuration (optional)
     SONAR_HOST_URL: "https://sonarcloud.io"
     SONAR_ORG: "kubeirving-projects"  # Replace with your SonarCloud organization
-    SONAR_PROJECT: "vprofile-repo"  # Replace with your SonarCloud project key
+    SONAR_PROJECT: "newthiesco_kubeirving-projects"  # Replace with your SonarCloud project key
     SONAR_TOKEN: "VPROFILE_SONARTOKEN"  # Replace with your SonarCloud token
     MAVEN_OPTS: "-Xmx2g"  # Increase Maven memory limit
     CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN"
@@ -54,7 +54,7 @@ phases:
       # Optional: Run SonarCloud analysis
       - echo "Running SonarCloud analysis..."
       - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey="newthiesco_kubeirving-projects" \
+          -Dsonar.projectKey="$PROJECT" \
           -Dsonar.organization="$SONAR_ORG" \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.login="$SONAR_TOKEN"
