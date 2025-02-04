@@ -3,12 +3,12 @@ version: 0.2
 env:
   variables:
     # SonarCloud configuration (optional)
-    SONAR_HOST_URL: "https://sonarcloud.io"
-    SONAR_ORG: "kubeirving-projects"  # Replace with your SonarCloud organization
+    SONAR_HOST_URL: "HOST"
+    SONAR_ORG: "ORGANIZATION"  # Replace with your SonarCloud organization
     SONAR_PROJECT: "SONAR_PROJECT"  # Replace with your SonarCloud project key
     SONAR_TOKEN: "VPROFILE_SONARTOKEN"  # Replace with your SonarCloud token
     MAVEN_OPTS: "-Xmx2g"  # Increase Maven memory limit
-    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN"
+   
 
 phases:
   install:
