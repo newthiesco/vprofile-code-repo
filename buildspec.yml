@@ -53,7 +53,11 @@ phases:
 
       # Optional: Run SonarCloud analysis
       - echo "Running SonarCloud analysis..."
-      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey="$SONAR_PROJECT" -Dsonar.organization="$SONAR_ORG" -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.login="$SONAR_TOKEN"
+      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+        -Dsonar.projectKey="$SONAR_PROJECT" \
+        -Dsonar.organization="$SONAR_ORG" \
+        -Dsonar.host.url="$SONAR_HOST_URL" \
+        -Dsonar.login="$SONAR_TOKEN"
 
   post_build:
     commands:
