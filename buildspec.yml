@@ -12,9 +12,11 @@ env:
 phases:
   install:
     commands:
-      - echo "Installing Java 8..."
+      - echo "Installing Java 17..."
       - sudo apt-get update
-      - sudo apt-get install -y openjdk-8-jdk maven unzip curl
+      - sudo apt-get install -y openjdk-17-jdk maven unzip curl
+      - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - export PATH=$JAVA_HOME/bin:$PATH
       - java -version
       - mvn -version
 
