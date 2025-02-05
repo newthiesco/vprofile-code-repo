@@ -47,7 +47,8 @@ phases:
       - mvn clean install -U
 
       - echo "Running SonarCloud analysis..."
-      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1:sonar -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+
 
   post_build:
     commands:
