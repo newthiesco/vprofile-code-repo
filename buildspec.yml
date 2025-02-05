@@ -43,6 +43,9 @@ phases:
 
   build:
     commands:
+
+      - echo "Adding SonarCloud repository..."
+      - echo '<settings><mirrors><mirror><id>sonatype</id><url>https://repo.maven.apache.org/maven2</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>' > ~/.m2/settings.xml
       - echo "Building project and running tests..."
       - mvn clean install -U
 
