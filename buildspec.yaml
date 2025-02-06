@@ -32,7 +32,7 @@ phases:
         -Dsonar.login=$SONAR_TOKEN \
         -Dsonar.host.url=$HOST \
         # -Dsonar.codeartifact.token=$CODEARTIFACT_TOKEN
-        # -Dsonar.java.jdkHome=/usr/lib/jvm/java-17-openjdk-amd64  # Adjust if necessary
+        # -Dsonar.java.jdkHome=/usr/lib/jvm/java-17-openjdk-amd64  # Adjust
 
 artifacts:
   files:
