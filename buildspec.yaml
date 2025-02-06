@@ -27,7 +27,7 @@ phases:
       - echo "Running SonarCloud analysis with Maven..."
       - mvn clean install -X
       - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.projectKey=$PROJECT \
+        -Dsonar.projectKey=$SONAR_PROJECT \
         -Dsonar.organization=$ORGANIZATION \
         -Dsonar.login=$SONAR_TOKEN \
         -Dsonar.host.url=$HOST \
