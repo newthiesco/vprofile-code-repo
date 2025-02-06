@@ -1,0 +1,44 @@
+version: 0.2
+
+env:
+  parameter-store:
+    SONAR_TOKEN: "VPROFILE_SONARTOKEN" # The SSM parameter name is SONARTOKEN
+    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN" # The SSM parameter name is CODEARTIFACT_TOKEN
+    HOST: "HOST" # The SSM parameter name is HOST
+    ORGANIZATION: "ORGANIZATION" # The SSM parameter name is ORGANIZATION
+    SONAR_PROJECT: "SONAR_PROJECT" # The SSM parameter name is PROJECT
+    CODEARTIFACT_DOMAIN: "domain" # The SSM parameter name for CodeArtifact domain
+    CODEARTIFACT_OWNER: "domain-owner" # The SSM parameter name for CodeArtifact owner
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+
+  pre_build:
+    commands:
+      - echo "Preparing environment..."
+      #- mvn test -Dsonar.skip=true
+      # The parameters will automatically be pulled from the SSM Parameter Store into environment variables
+      - echo "Environment setup completed."
+
+  build:
+    commands:
+      - echo "Running SonarCloud analysis with Maven..."
+      - mvn clean install -X
+      - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+        -Dsonar.projectKey=$PROJECT \
+        -Dsonar.organization=$ORGANIZATION \
+        -Dsonar.login=$SONAR_TOKEN \
+        -Dsonar.host.url=$HOST \
+        # -Dsonar.codeartifact.token=$CODEARTIFACT_TOKEN
+        # -Dsonar.java.jdkHome=/usr/lib/jvm/java-17-openjdk-amd64  # Adjust if necessary
+
+artifacts:
+  files:
+    - "**/*"
+  discard-paths: yes
+
+cache:
+  paths:
+    - "/root/.m2/**/*"
