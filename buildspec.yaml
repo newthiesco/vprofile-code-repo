@@ -30,8 +30,7 @@ phases:
     commands:
       - echo "Running SonarCloud analysis with Maven..."
       - mvn clean install -X
-      - |
-        mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.organization=$ORGANIZATION -Dsonar.host.url=$HOST -Dsonar.login=$SONAR_TOKEN
+      - "mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONAR_PROJECT -Dsonar.organization=$ORGANIZATION -Dsonar.host.url=$HOST -Dsonar.login=$SONAR_TOKEN"
 
 artifacts:
   files:
