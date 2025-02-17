@@ -1,0 +1,44 @@
+version: 0.2
+
+env:
+  parameter-store:
+    SONAR_TOKEN: "VPROFILE_SONARTOKEN"
+    CODEARTIFACT_TOKEN: "CODEARTIFACT_TOKEN"
+    HOST: "HOST"
+    ORGANIZATION: "ORGANIZATION"
+    SONAR_PROJECT: "SONAR_PROJECT"
+    CODEARTIFACT_DOMAIN: "domain"
+    CODEARTIFACT_OWNER: "domain-owner"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  
+  pre_build:
+    commands:
+      - echo "Preparing environment..."
+      - aws --version
+      - mvn --version
+      
+  build:
+    commands:
+      - echo "Running build and tests..."
+      - mvn clean package
+      - echo "Running SonarCloud analysis..."
+      - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+        -Dsonar.projectKey=$SONAR_PROJECT \
+        -Dsonar.organization=$ORGANIZATION \
+        -Dsonar.login=$SONAR_TOKEN \
+        -Dsonar.host.url=$HOST
+      
+artifacts:
+  files:
+    - target/*.war
+    - appspec.yml
+    - scripts/**/*
+  discard-paths: no
+
+cache:
+  paths:
+    - '/root/.m2/**/*'
