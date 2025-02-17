@@ -26,11 +26,12 @@ phases:
       - echo "Running build and tests..."
       - mvn clean package
       - echo "Running SonarCloud analysis..."
-      - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.projectKey=$SONAR_PROJECT \
-        -Dsonar.organization=$ORGANIZATION \
-        -Dsonar.login=$SONAR_TOKEN \
-        -Dsonar.host.url=$HOST
+      - |
+        mvn verify sonar:sonar \
+          -Dsonar.projectKey=${SONAR_PROJECT} \
+          -Dsonar.organization=${ORGANIZATION} \
+          -Dsonar.host.url=${HOST} \
+          -Dsonar.login=${SONAR_TOKEN}
       
 artifacts:
   files:
