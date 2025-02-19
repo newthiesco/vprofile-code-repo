@@ -17,31 +17,24 @@ phases:
     commands:
       - echo "Installing Java 17..."
       - java -version
-      
+  
   pre_build:
     commands:
       - echo "Preparing environment..."
       - aws --version
       - mvn --version
-      
+  
   build:
     commands:
       - echo "Running build and tests..."
       - mvn clean package
       - echo "Running SonarCloud analysis..."
-      - mvn sonar:sonar \
-          -Dsonar.projectKey=${SONAR_PROJECT} \
-          -Dsonar.organization=${ORGANIZATION} \
-          -Dsonar.host.url=${HOST} \
-          -Dsonar.login=${SONAR_TOKEN}
-      
+      - |
+        mvn sonar:sonar \
+        -Dsonar.projectKey=${SONAR_PROJECT} \
+        -Dsonar.organization=${ORGANIZATION} \
+        -Dsonar.host.url=${HOST} \
+        -Dsonar.login=${SONAR_TOKEN}
+
 artifacts:
   files:
-    - target/*.war
-    - appspec.yml
-    - scripts/**/*
-  discard-paths: no
-
-cache:
-  paths:
-    - '/root/.m2/**/*'
